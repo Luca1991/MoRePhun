@@ -1,0 +1,8 @@
+[requires]
+sdl2/2.0.14@bincrafters/stable
+
+[options]
+*:shared=True
+
+[generators]
+cmake
