@@ -30,6 +30,10 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16];
 		break;
+	case SLLi: // 0x1C
+		registers[pc] += sizeof(uint32_t);
+		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] << ((opcode & 0xFF000000) >> 24);
+		break;
 	case ADDQ: // 0x1F
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] + static_cast<int8_t>((opcode & 0xFF000000) >> 24);
