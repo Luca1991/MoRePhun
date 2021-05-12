@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <unordered_map>
+#include <thread>
+#include <chrono>
 #include "vmgp_header.h"
 #include "memory.h"
 #include "video.h"
@@ -26,4 +28,5 @@ class MophunVM {
 
 		void mPrint(const std::string& str); // this function need to be moved from MophunVM class
 		std::string getStringFromMemory(uint32_t addr); // this function need to be moved from MophunVM class
+		uint32_t timer = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(); // this function need to be moved from MophunVM class
 };

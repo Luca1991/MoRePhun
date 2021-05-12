@@ -2,6 +2,7 @@
 #include "registers.h"
 #include "system.h"
 #include <sstream>
+#include <chrono>
 
 
 void MophunVM::apiHandler(const std::string &api)
@@ -33,6 +34,11 @@ void MophunVM::apiHandler(const std::string &api)
 	}
 	else if (api == "vGetRandom") {
 		registers[r0] = vGetRandom();
+	}
+	else if (api == "vGetTickCount")
+	{
+		registers[r0] = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()-timer;
+	
 	}
 	else {
 		std::cout << "Unknown api: " << api.c_str() << std::endl;

@@ -2,6 +2,7 @@
 #include "registers.h"
 #include "opcodes.h"
 
+
 void MophunVM::emulate()
 {
 	auto opcode = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
@@ -105,6 +106,10 @@ void MophunVM::emulate()
 		registers[pc] = registers[ra];
 		break;
 	}
+	case SLEEP:
+		registers[pc] += sizeof(uint32_t);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		break;
 	case ANDi: // 0x4B
 	{
 		registers[pc] += sizeof(uint32_t);
@@ -123,6 +128,21 @@ void MophunVM::emulate()
 		{ // ANDi from pool item
 			// FIXME TODO -> check if this is possile
 			std::cout << "ERROR ANDi: unhandled case" << std::endl;
+		}
+		break;
+	}
+	case MULi:
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t mulType = (val & 0xFF000000) >> 24;
+		if (mulType == 0x80) {
+			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int32_t>(val & 0x00FFFFFF);
+		}
+		else {
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR MULi: unhandled case" << std::endl;
 		}
 		break;
 	}
@@ -197,6 +217,28 @@ void MophunVM::emulate()
 			registers[(opcode & 0x0000FF00) >> 8] = decodedPoolItem.value;
 		}
 		registers[pc] += sizeof(uint32_t);
+		break;
+	}
+	case BLTU: // 0x66
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t bltuType = (val & 0xFF000000) >> 24;
+		if (bltuType == 0x80) {
+			if (registers[(opcode & 0x0000FF00) >> 8] < registers[(opcode & 0x00FF0000) >> 16]) {
+				registers[pc] += (val & 0x00FFFFFF) - sizeof(uint32_t);
+			}
+			else {
+				registers[pc] += sizeof(uint32_t);
+			}
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BLTU: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
+		}
+		
 		break;
 	}
 	default:
