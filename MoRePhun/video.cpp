@@ -1,7 +1,7 @@
 #include "video.h"
 #include <iostream>
 
-void Video::init()
+Video::Video()
 {
 	int rendererFlags = SDL_RENDERER_ACCELERATED;
 	int windowFlags = 0;
@@ -29,4 +29,8 @@ void Video::init()
 		std::cout << "Failed to create renderer: " << SDL_GetError() << std::endl;
 		exit(1);
 	}
+}
+
+Video::~Video()
+{
 }

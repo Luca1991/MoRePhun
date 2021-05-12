@@ -12,6 +12,7 @@ struct Renderer{
 
 class Video {
 	public:
-		void init();
+		Video();
+		~Video();
 		Renderer app;
 };

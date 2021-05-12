@@ -21,6 +21,8 @@ int main()
 		mophunVM->emulate();		
 	}
 	
+	delete mophunVM;
+
 	std::cout << "Execution ended. Press enter to quit." << std::endl;
 	std::getchar();
     return 0;

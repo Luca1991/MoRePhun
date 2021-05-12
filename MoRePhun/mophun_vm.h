@@ -14,6 +14,7 @@ class MophunVM {
 
 	public:
 		MophunVM();
+		~MophunVM();
 		bool loadRom(std::string romPath);
 		void emulate();
 		bool status;

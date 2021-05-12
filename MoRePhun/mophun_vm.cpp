@@ -13,6 +13,9 @@ MophunVM::MophunVM()
 	{g7, 0}, {g8, 0}, {g9, 0}, {g10, 0}, {g11, 0}, {g12, 0}, {g13, 0},
 	{r0, 0}, {r1, 0},
 	{pc, sizeof(VMGPHeader)} };
+}
 
-	video->init();
+MophunVM::~MophunVM()
+{
+	delete video;
 }
