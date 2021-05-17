@@ -11,7 +11,7 @@ int main()
 		std::cout << "Rom loaded!" << std::endl;
 	}
 	else {
-		std::cout << "Rom NOT loaded!" << std::endl;
+		std::cout << "Rom not found or invalid magic no." << std::endl;
 		std::getchar();
 		return 0;
 	}
