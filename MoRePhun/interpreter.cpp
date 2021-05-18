@@ -47,7 +47,7 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int8_t>((opcode & 0xFF000000) >> 24);
 		break;
-	case ORBi:
+	case ORBi: // 0x23
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] | static_cast<int8_t>((opcode & 0xFF000000) >> 24);
 		break;
@@ -106,7 +106,7 @@ void MophunVM::emulate()
 		registers[pc] = registers[ra];
 		break;
 	}
-	case SLEEP:
+	case SLEEP: // 0x47
 		registers[pc] += sizeof(uint32_t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		break;
@@ -131,7 +131,7 @@ void MophunVM::emulate()
 		}
 		break;
 	}
-	case MULi:
+	case MULi: // 0x4C
 	{
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
@@ -163,7 +163,7 @@ void MophunVM::emulate()
 		}
 		break;
 	}
-	case JPl:
+	case JPl: // 0x5B
 	{
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));

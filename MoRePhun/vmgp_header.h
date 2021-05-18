@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 
 #pragma pack(push, 1)
 struct VMGPHeader

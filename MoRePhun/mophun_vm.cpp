@@ -4,7 +4,6 @@
 
 MophunVM::MophunVM()
 {
-	status = true;
 	memory.ram.resize(RAM_SIZE);
 	registers = { {zero, 0}, {sp, memory.ram.size()-1}, {ra, 0}, {fp, 0},
 	{s0, 0}, {s1, 0}, {s2, 0}, {s3, 0}, {s4, 0},{s5, 0},{s6, 0}, {s7, 0},
@@ -17,5 +16,30 @@ MophunVM::MophunVM()
 
 MophunVM::~MophunVM()
 {
-	delete video;
+
+}
+
+void MophunVM::setApiCallback(const ApiCallback& apiHandler)
+{
+	this->apiHandler = apiHandler;
+}
+
+uint32_t MophunVM::readReg(uint32_t reg)
+{
+	return registers[reg];
+}
+
+void MophunVM::writeReg(uint32_t reg, uint32_t val)
+{
+	registers[reg] = val;
+}
+
+uint32_t MophunVM::readRam(uint32_t offset)
+{
+	return memory.ram[offset];
+}
+
+uint8_t* MophunVM::getRamAddress(uint32_t offset)
+{
+	return std::addressof(memory.ram[offset]);
 }

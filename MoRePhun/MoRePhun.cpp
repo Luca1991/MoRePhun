@@ -1,27 +1,18 @@
 #define SDL_MAIN_HANDLED
 #include <stdio.h>
-#include "mophun_vm.h"
+#include "mophun_os.h"
 
 
 int main()
 {
-	MophunVM* mophunVM = new MophunVM();
-	if (mophunVM->loadRom("load.mpn"))
+	MophunOS* mophunOS = new MophunOS();
+	if (!mophunOS->loadRom())
 	{
-		std::cout << "Rom loaded!" << std::endl;
-	}
-	else {
-		std::cout << "Rom not found or invalid magic no." << std::endl;
-		std::getchar();
 		return 0;
 	}
+	mophunOS->emulate();
 
-	while (mophunVM->status)
-	{
-		mophunVM->emulate();		
-	}
-	
-	delete mophunVM;
+	delete mophunOS;
 
 	std::cout << "Execution ended. Press enter to quit." << std::endl;
 	std::getchar();

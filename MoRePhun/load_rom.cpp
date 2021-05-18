@@ -4,7 +4,7 @@
 #include "vmgp_header.h"
 
 
-bool MophunVM::loadRom(std::string romPath)
+bool MophunVM::loadRom(const std::string& romPath)
 {
 	std::ifstream romFile(romPath, std::ios::in | std::ios::binary | std::ios::ate);
 	if (romFile.is_open())
