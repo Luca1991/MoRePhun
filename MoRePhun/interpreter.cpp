@@ -137,12 +137,34 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 		uint8_t mulType = (val & 0xFF000000) >> 24;
-		if (mulType == 0x80) {
+		if (mulType == 0x80)
+		{
 			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int32_t>(val & 0x00FFFFFF);
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR MULi: unhandled case" << std::endl;
+		}
+		break;
+	}
+	case DIVi: // 0x4D
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t divType = (val & 0xFF000000) >> 24;
+		if (divType == 0x80)
+		{
+			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>(val & 0x00FFFFFF);
+		}
+		else if (divType == 0xFF)
+		{
+			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>(val);
 		}
 		else {
 			// FIXME TODO -> check if this is possile
-			std::cout << "ERROR MULi: unhandled case" << std::endl;
+			std::cout << "ERROR DIVi: unhandled case" << std::endl;
 		}
 		break;
 	}

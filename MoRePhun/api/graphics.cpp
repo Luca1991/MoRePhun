@@ -2,7 +2,6 @@
 
 void MophunOS::vClearScreen(uint32_t color)
 {
-	
 	uint8_t rgb[3];
 	rgb[0] = (color & 0x7C00) >> 7;
 	rgb[1] = (color & 0x3E0) >> 2;
@@ -16,4 +15,9 @@ void MophunOS::vFlipScreen(uint32_t block)
 {
 	// FIXME TODO: check vblank
 	SDL_RenderPresent(video->app.renderer);
+}
+
+void MophunOS::vSetForeColor(uint32_t color)
+{	// FIXME: need test!
+	osdata.currentFgColor = color;
 }

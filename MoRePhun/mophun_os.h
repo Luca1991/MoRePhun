@@ -30,6 +30,7 @@ class MophunOS {
 		// Graphics api
 		void vClearScreen(uint32_t color);
 		void vFlipScreen(uint32_t block);
+		void vSetForeColor(uint32_t color);
 
 		// Time/data api
 		uint32_t vGetTickCount();

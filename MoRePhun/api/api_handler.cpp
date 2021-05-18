@@ -22,6 +22,10 @@ void MophunOS::apiHandler(const std::string &api)
 		printf("vFlipScreen %x\n", mophunVM->readReg(p0));
 		vFlipScreen(mophunVM->readReg(p0));
 	}
+	else if (api == "vSetForeColor")
+	{
+		vSetForeColor(mophunVM->readReg(p0));
+	}
 	else if (api == "vTerminateVMGP") {
 		vTerminateVMGP();
 		status = false;
