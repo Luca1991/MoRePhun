@@ -16,7 +16,7 @@ bool MophunVM::loadRom(const std::string& romPath)
 
 		pRomHeader = reinterpret_cast<VMGPHeader*>(memory.ram.data());
 
-		if (std::string(pRomHeader->magicNo) != "VMGP")
+		if (std::string(pRomHeader->magicNo, 4) != "VMGP")
 			return false;
 
 		memory.codeSegStartAddr = sizeof(VMGPHeader);
