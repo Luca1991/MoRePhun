@@ -39,6 +39,10 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) >> ((opcode & 0xFF000000) >> 24);
 		break;
+	case SRLi: // 0x1E 
+		registers[pc] += sizeof(uint32_t);
+		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] >> ((opcode & 0xFF000000) >> 24);
+		break;
 	case ADDQ: // 0x1F
 		registers[pc] += sizeof(uint32_t);
 		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] + static_cast<int8_t>((opcode & 0xFF000000) >> 24);
@@ -116,13 +120,9 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 		uint8_t andType = (val & 0xFF000000) >> 24;
-		if (andType == 0x80)
+		if (andType != 0x00)
 		{ // ANDi immediate 24bit
-			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & static_cast<int32_t>(val & 0x00FFFFFF);
-		}
-		else if (andType == 0xFF)
-		{ // ANDi immediate 32bit
-			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & static_cast<int32_t>(val);
+			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
 		}
 		else
 		{ // ANDi from pool item
@@ -137,9 +137,9 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 		uint8_t mulType = (val & 0xFF000000) >> 24;
-		if (mulType == 0x80)
+		if (mulType != 0x00)
 		{
-			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int32_t>(val & 0x00FFFFFF);
+			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
 		}
 		else
 		{
@@ -154,13 +154,9 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 		uint8_t divType = (val & 0xFF000000) >> 24;
-		if (divType == 0x80)
+		if (divType != 0x00)
 		{
-			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>(val & 0x00FFFFFF);
-		}
-		else if (divType == 0xFF)
-		{
-			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>(val);
+			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
 		}
 		else {
 			// FIXME TODO -> check if this is possile
@@ -174,9 +170,9 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 		uint8_t stwType = (val & 0xFF000000) >> 24;
-		if (stwType == 0x80)
+		if (stwType != 0x00)
 		{	// STW immediate
-			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[(opcode & 0x00FF0000) >> 16] + (val & 0x00FFFFFF)])) = registers[(opcode & 0x0000FF00) >> 8];
+			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[(opcode & 0x00FF0000) >> 16] + ((val & 0x7fffffff) | ((val << 1) & 0x80000000))])) = registers[(opcode & 0x0000FF00) >> 8];
 		}
 		else
 		{ // STW from pool item
@@ -225,13 +221,9 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		uint8_t ldiType = (val & 0xFF000000) >> 24;
-		if (ldiType == 0x80)
+		if (ldiType != 0x00)
 		{ // LDI immediate 24bit
-			registers[(opcode & 0x0000FF00) >> 8] = val & 0x00FFFFFF;
-		}
-		else if (ldiType == 0xFF)
-		{ // LDI immediate 32bit
-			registers[(opcode & 0x0000FF00) >> 8] = val;
+			registers[(opcode & 0x0000FF00) >> 8] = (val & 0x7fffffff) | ((val << 1) & 0x80000000);
 		}
 		else
 		{ // LDI from pool item
@@ -246,9 +238,9 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		uint8_t bltuType = (val & 0xFF000000) >> 24;
-		if (bltuType == 0x80) {
+		if (bltuType != 0x00) {
 			if (registers[(opcode & 0x0000FF00) >> 8] < registers[(opcode & 0x00FF0000) >> 16]) {
-				registers[pc] += (val & 0x00FFFFFF) - sizeof(uint32_t);
+				registers[pc] += ((val & 0x7fffffff) | ((val << 1) & 0x80000000)) - sizeof(uint32_t);
 			}
 			else {
 				registers[pc] += sizeof(uint32_t);
