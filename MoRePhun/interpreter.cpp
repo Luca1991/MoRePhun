@@ -121,7 +121,7 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		uint8_t andType = (val & 0xFF000000) >> 24;
 		if (andType != 0x00)
-		{ // ANDi immediate 24bit
+		{ // ANDi immediate 32bit
 			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
 		}
 		else
@@ -239,7 +239,7 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		uint8_t ldiType = (val & 0xFF000000) >> 24;
 		if (ldiType != 0x00)
-		{ // LDI immediate 24bit
+		{ // LDI immediate 32bit
 			registers[(opcode & 0x0000FF00) >> 8] = (val & 0x7fffffff) | ((val << 1) & 0x80000000);
 		}
 		else
