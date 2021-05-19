@@ -181,6 +181,23 @@ void MophunVM::emulate()
 		}
 		break;
 	}
+	case LDWd: // 0x57
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t ldwType = (val & 0xFF000000) >> 24;
+		if (ldwType != 0x00)
+		{	// LDW immediate
+			registers[(opcode & 0x0000FF00) >> 8] = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[(opcode & 0x00FF0000) >> 16] + ((val & 0x7fffffff) | ((val << 1) & 0x80000000))]));
+		}
+		else
+		{ // LDW from pool item
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR LDWd: unhandled case" << std::endl;
+		}
+		break;
+	}
 	case JPl: // 0x5B
 	{
 		registers[pc] += sizeof(uint32_t);
