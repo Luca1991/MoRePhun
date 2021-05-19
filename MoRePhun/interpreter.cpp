@@ -250,16 +250,42 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		break;
 	}
+	case BGTU: // 0x62
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t bgtuType = (val & 0xFF000000) >> 24;
+		if (bgtuType != 0x00)
+		{
+			if (registers[(opcode & 0x0000FF00) >> 8] > registers[(opcode & 0x00FF0000) >> 16]) {
+				registers[pc] += ((val & 0x7fffffff) | ((val << 1) & 0x80000000)) - sizeof(uint32_t);
+			}
+			else
+			{
+				registers[pc] += sizeof(uint32_t);
+			}
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BGTU: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
+		}
+		break;
+	}
 	case BLTU: // 0x66
 	{
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		uint8_t bltuType = (val & 0xFF000000) >> 24;
-		if (bltuType != 0x00) {
-			if (registers[(opcode & 0x0000FF00) >> 8] < registers[(opcode & 0x00FF0000) >> 16]) {
+		if (bltuType != 0x00)
+		{
+			if (registers[(opcode & 0x0000FF00) >> 8] < registers[(opcode & 0x00FF0000) >> 16])
+			{
 				registers[pc] += ((val & 0x7fffffff) | ((val << 1) & 0x80000000)) - sizeof(uint32_t);
 			}
-			else {
+			else
+			{
 				registers[pc] += sizeof(uint32_t);
 			}
 		}
@@ -269,7 +295,6 @@ void MophunVM::emulate()
 			std::cout << "ERROR BLTU: unhandled case" << std::endl;
 			registers[pc] += sizeof(uint32_t);
 		}
-		
 		break;
 	}
 	default:
