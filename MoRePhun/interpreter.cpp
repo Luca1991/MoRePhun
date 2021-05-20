@@ -1,3 +1,4 @@
+#include "interpreter.h"
 #include "mophun_vm.h"
 #include "registers.h"
 #include "opcodes.h"
@@ -5,91 +6,92 @@
 
 void MophunVM::emulate()
 {
-	auto opcode = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
-	switch (opcode & 0x000000FF)
+	auto instruction = *reinterpret_cast<PIPInstruction*>(std::addressof(memory.ram[registers[pc]]));
+
+	switch (instruction.gen.opcode)
 	{
 	case NOP: // 0x01
 		registers[pc] += sizeof(uint32_t);
 		break;
 	case ADD: // 0x02
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] + registers[(opcode & 0xFF000000) >> 24];
+		registers[instruction.gen.dest] = registers[instruction.gen.source] + registers[instruction.gen.extra];
 		break;
 	case AND: // 0x03
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & registers[(opcode & 0xFF000000) >> 24];
+		registers[instruction.gen.dest] = registers[instruction.gen.source] & registers[instruction.gen.extra];
 		break;
 	case MUL: // 0x04
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * registers[(opcode & 0xFF000000) >> 24];
+		registers[instruction.gen.dest] = registers[instruction.gen.source] * registers[instruction.gen.extra];
 		break;
 	case NEG: // 0x0E
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = -(registers[(opcode & 0x00FF0000) >> 16]);
+		registers[instruction.gen.dest] = -(registers[instruction.gen.source]);
 		break;
 	case MOV: // 0x11
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16];
+		registers[instruction.gen.dest] = registers[instruction.gen.source];
 		break;
 	case SLLi: // 0x1C
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] << ((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] << instruction.gen.extra;
 		break;
 	case SRAi: // 0x1D
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) >> ((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = static_cast<int32_t>(registers[instruction.gen.source]) >> instruction.gen.extra;
 		break;
 	case SRLi: // 0x1E 
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] >> ((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] >> instruction.gen.extra;
 		break;
 	case ADDQ: // 0x1F
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] + static_cast<int8_t>((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] + static_cast<int8_t>(instruction.gen.extra);
 		break;
 	case MULQ: // 0x20
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int8_t>((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] * static_cast<int8_t>(instruction.gen.extra);
 		break;
 	case ORBi: // 0x23
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] | static_cast<int8_t>((opcode & 0xFF000000) >> 24);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] | static_cast<int8_t>(instruction.gen.extra);
 		break;
 	case BGEI: // 0x2E
-		if (static_cast<int32_t>(registers[(opcode & 0x0000FF00) >> 8]) >= static_cast<int8_t>(((opcode & 0x00FF0000) >> 16)))
-			registers[pc] += ((opcode & 0xFF000000) >> 24) * sizeof(uint32_t);
+		if (static_cast<int32_t>(registers[instruction.gen.dest]) >= static_cast<int8_t>((instruction.gen.source)))
+			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BEQI: // 0x2C
-		if (static_cast<int32_t>(registers[(opcode & 0x0000FF00) >> 8]) == static_cast<int8_t>(((opcode & 0x00FF0000) >> 16)))
-			registers[pc] += ((opcode & 0xFF000000) >> 24) * sizeof(uint32_t);
+		if (static_cast<int32_t>(registers[instruction.gen.dest]) == static_cast<int8_t>((instruction.gen.source)))
+			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BGTI: // 0x30
-		if (static_cast<int32_t>(registers[(opcode & 0x0000FF00) >> 8]) > static_cast<int8_t>(((opcode & 0x00FF0000) >> 16)))
-			registers[pc] += ((opcode & 0xFF000000) >> 24) * sizeof(uint32_t);
+		if (static_cast<int32_t>(registers[instruction.gen.dest]) > static_cast<int8_t>((instruction.gen.source)))
+			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BLEI: // 0x32 
-		if (static_cast<int32_t>(registers[(opcode & 0x0000FF00) >> 8]) <= static_cast<int8_t>(((opcode & 0x00FF0000) >> 16)))
-			registers[pc] += ((opcode & 0xFF000000) >> 24)*sizeof(uint32_t);
+		if (static_cast<int32_t>(registers[instruction.gen.dest]) <= static_cast<int8_t>((instruction.gen.source)))
+			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case LDQ: // 0x40
 		registers[pc] += sizeof(uint32_t);
-		registers[(opcode & 0x0000FF00) >> 8] = static_cast<int16_t>((opcode & 0xFFFF0000) >> 16);
+		registers[instruction.gen.dest] = static_cast<int16_t>(instruction.word.word);
 		break;
 	case JPr: // 0x41
-		registers[pc] = registers[(opcode & 0xFFFFFF00) >> 8];
+		registers[pc] = registers[instruction.gen.dest];
 		break;
 	case STORE: // 0x43
 	{
-		uint32_t regStart = (opcode & 0x0000FF00) >> 8;
-		uint32_t regEnd = regStart + ((opcode & 0x00FF0000) >> 16);
+		uint32_t regStart = instruction.gen.dest;
+		uint32_t regEnd = regStart + (instruction.gen.source);
 		for (uint32_t r = regStart; r < regEnd; r+=sizeof(uint32_t))
 		{
 			registers[sp] -= sizeof(uint32_t);
@@ -100,8 +102,8 @@ void MophunVM::emulate()
 	}
 	case RET: // 0x45
 	{
-		uint32_t regStart = (opcode & 0x0000FF00) >> 8;
-		uint32_t regEnd = regStart - ((opcode & 0x00FF0000) >> 16);
+		uint32_t regStart = instruction.gen.dest;
+		uint32_t regEnd = regStart - (instruction.gen.source);
 		for (uint32_t r = regStart; r > regEnd; r -= sizeof(uint32_t))
 		{
 			registers[r] = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[sp]]));
@@ -122,7 +124,7 @@ void MophunVM::emulate()
 		uint8_t andType = (val & 0xFF000000) >> 24;
 		if (andType != 0x00)
 		{ // ANDi immediate 32bit
-			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] & static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
+			registers[instruction.gen.dest] = registers[instruction.gen.source] & static_cast<int32_t>(decodeImmediate(val));
 		}
 		else
 		{ // ANDi from pool item
@@ -139,7 +141,7 @@ void MophunVM::emulate()
 		uint8_t mulType = (val & 0xFF000000) >> 24;
 		if (mulType != 0x00)
 		{
-			registers[(opcode & 0x0000FF00) >> 8] = registers[(opcode & 0x00FF0000) >> 16] * static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
+			registers[instruction.gen.dest] = registers[instruction.gen.source] * static_cast<int32_t>(decodeImmediate(val));
 		}
 		else
 		{
@@ -156,7 +158,7 @@ void MophunVM::emulate()
 		uint8_t divType = (val & 0xFF000000) >> 24;
 		if (divType != 0x00)
 		{
-			registers[(opcode & 0x0000FF00) >> 8] = static_cast<int32_t>(registers[(opcode & 0x00FF0000) >> 16]) / static_cast<int32_t>((val & 0x7fffffff) | ((val << 1) & 0x80000000));
+			registers[instruction.gen.dest] = static_cast<int32_t>(registers[instruction.gen.source]) / static_cast<int32_t>(decodeImmediate(val));
 		}
 		else {
 			// FIXME TODO -> check if this is possile
@@ -172,7 +174,7 @@ void MophunVM::emulate()
 		uint8_t stwType = (val & 0xFF000000) >> 24;
 		if (stwType != 0x00)
 		{	// STW immediate
-			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[(opcode & 0x00FF0000) >> 16] + ((val & 0x7fffffff) | ((val << 1) & 0x80000000))])) = registers[(opcode & 0x0000FF00) >> 8];
+			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + decodeImmediate(val)])) = registers[instruction.gen.dest];
 		}
 		else
 		{ // STW from pool item
@@ -189,7 +191,7 @@ void MophunVM::emulate()
 		uint8_t ldwType = (val & 0xFF000000) >> 24;
 		if (ldwType != 0x00)
 		{	// LDW immediate
-			registers[(opcode & 0x0000FF00) >> 8] = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[(opcode & 0x00FF0000) >> 16] + ((val & 0x7fffffff) | ((val << 1) & 0x80000000))]));
+			registers[instruction.gen.dest] = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + decodeImmediate(val)]));
 		}
 		else
 		{ // LDW from pool item
@@ -204,9 +206,9 @@ void MophunVM::emulate()
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] -= sizeof(uint32_t);
 		uint8_t jpType = (val & 0xFF000000) >> 24;
-		if (jpType == 0xFF)
+		if (jpType != 0x00)
 		{	// JPl immediate
-			registers[pc] += static_cast<int32_t>(val);
+			registers[pc] += static_cast<int32_t>(decodeImmediate(val));
 		}
 		else
 		{
@@ -240,12 +242,12 @@ void MophunVM::emulate()
 		uint8_t ldiType = (val & 0xFF000000) >> 24;
 		if (ldiType != 0x00)
 		{ // LDI immediate 32bit
-			registers[(opcode & 0x0000FF00) >> 8] = (val & 0x7fffffff) | ((val << 1) & 0x80000000);
+			registers[instruction.gen.dest] = decodeImmediate(val);
 		}
 		else
 		{ // LDI from pool item
 			auto decodedPoolItem = poolItemHandler(val);
-			registers[(opcode & 0x0000FF00) >> 8] = decodedPoolItem.value;
+			registers[instruction.gen.dest] = decodedPoolItem.value;
 		}
 		registers[pc] += sizeof(uint32_t);
 		break;
@@ -257,8 +259,8 @@ void MophunVM::emulate()
 		uint8_t bgtuType = (val & 0xFF000000) >> 24;
 		if (bgtuType != 0x00)
 		{
-			if (registers[(opcode & 0x0000FF00) >> 8] > registers[(opcode & 0x00FF0000) >> 16]) {
-				registers[pc] += ((val & 0x7fffffff) | ((val << 1) & 0x80000000)) - sizeof(uint32_t);
+			if (registers[instruction.gen.dest] > registers[instruction.gen.source]) {
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
 			}
 			else
 			{
@@ -280,9 +282,9 @@ void MophunVM::emulate()
 		uint8_t bltuType = (val & 0xFF000000) >> 24;
 		if (bltuType != 0x00)
 		{
-			if (registers[(opcode & 0x0000FF00) >> 8] < registers[(opcode & 0x00FF0000) >> 16])
+			if (registers[instruction.gen.dest] < registers[instruction.gen.source])
 			{
-				registers[pc] += ((val & 0x7fffffff) | ((val << 1) & 0x80000000)) - sizeof(uint32_t);
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
 			}
 			else
 			{
@@ -298,9 +300,8 @@ void MophunVM::emulate()
 		break;
 	}
 	default:
-		std::cout << "unknown opcode: " << std::hex << opcode << " at PC: " << registers[pc] << std::endl;
+		std::cout << "unknown opcode: " << std::hex << instruction.gen.opcode << " at PC: " << registers[pc] << std::endl;
 		registers[pc] += sizeof(uint32_t);
 		break;
 	}
-
 }
