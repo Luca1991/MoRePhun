@@ -23,14 +23,16 @@ void MophunOS::DbgPrintf(const std::string& str)
 				ss << '%';
 				break;
 			case 'd':
-			case 'l':
 				ss << *reinterpret_cast<int32_t*>(mophunVM->getRamAddress(stackTmpPnt));
 				stackTmpPnt += sizeof(uint32_t);
 				break;
+			case 'l':
 			case 'f':
-				ss << static_cast<float>(*reinterpret_cast<uint32_t*>(mophunVM->getRamAddress(stackTmpPnt)));
-				stackTmpPnt += sizeof(uint32_t);
+			{
+				ss << (*reinterpret_cast<double*>(mophunVM->getRamAddress(stackTmpPnt)));
+				stackTmpPnt += sizeof(uint64_t);
 				break;
+			}
 			default:
 				ss << "%" << str[i];
 				break;

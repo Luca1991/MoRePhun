@@ -25,6 +25,10 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = registers[instruction.gen.source] * registers[instruction.gen.extra];
 		break;
+	case OR: // 0x07
+		registers[pc] += sizeof(uint32_t);
+		registers[instruction.gen.dest] = registers[instruction.gen.source] | registers[instruction.gen.extra];
+		break;
 	case NEG: // 0x0E
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = -(registers[instruction.gen.source]);
@@ -69,6 +73,12 @@ void MophunVM::emulate()
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
+	case BNEI: // 0x2D
+		if (static_cast<int32_t>(registers[instruction.gen.dest]) != static_cast<int8_t>((instruction.gen.source)))
+			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+		else
+			registers[pc] += sizeof(uint32_t);
+		break;
 	case BGTI: // 0x30
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) > static_cast<int8_t>((instruction.gen.source)))
 			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
@@ -92,7 +102,7 @@ void MophunVM::emulate()
 	{
 		uint32_t regStart = instruction.gen.dest;
 		uint32_t regEnd = regStart + (instruction.gen.source);
-		for (uint32_t r = regStart; r < regEnd; r+=sizeof(uint32_t))
+		for (uint32_t r = regStart; r < regEnd; r += sizeof(uint32_t))
 		{
 			registers[sp] -= sizeof(uint32_t);
 			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[sp]])) = registers[r];
@@ -116,6 +126,24 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		break;
+	case ADDi: // 0x4A
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t addType = (val & 0xFF000000) >> 24;
+		if (addType != 0x00)
+		{ // ADDi immediate 32bit
+			registers[instruction.gen.dest] = registers[instruction.gen.source] + static_cast<int32_t>(decodeImmediate(val));
+		}
+		else
+		{ // ADDi from pool item
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR ADDi: unhandled case" << std::endl;
+		}
+		break;
+		break;
+	}
 	case ANDi: // 0x4B
 	{
 		registers[pc] += sizeof(uint32_t);
@@ -200,6 +228,23 @@ void MophunVM::emulate()
 		}
 		break;
 	}
+	case LDI: // 0x5A
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t ldiType = (val & 0xFF000000) >> 24;
+		if (ldiType != 0x00)
+		{ // LDI immediate 32bit
+			registers[instruction.gen.dest] = decodeImmediate(val);
+		}
+		else
+		{ // LDI from pool item
+			auto decodedPoolItem = poolItemHandler(val);
+			registers[instruction.gen.dest] = decodedPoolItem.value;
+		}
+		registers[pc] += sizeof(uint32_t);
+		break;
+	}
 	case JPl: // 0x5B
 	{
 		registers[pc] += sizeof(uint32_t);
@@ -222,7 +267,7 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		auto decodedPoolItem = poolItemHandler(*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]])));
 		registers[pc] += sizeof(uint32_t);
-		
+
 		if (!decodedPoolItem.isSyscall)
 		{
 			registers[ra] = registers[pc];
@@ -235,21 +280,52 @@ void MophunVM::emulate()
 		}
 		break;
 	}
-	case LDI: // 0x5A
+	case BEQ:
 	{
 		registers[pc] += sizeof(uint32_t);
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
-		uint8_t ldiType = (val & 0xFF000000) >> 24;
-		if (ldiType != 0x00)
-		{ // LDI immediate 32bit
-			registers[instruction.gen.dest] = decodeImmediate(val);
+		uint8_t beqType = (val & 0xFF000000) >> 24;
+		if (beqType != 0x00)
+		{
+			if (static_cast<int32_t>(registers[instruction.gen.dest]) == static_cast<int32_t>(registers[instruction.gen.source]))
+			{
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
+			}
+			else
+			{
+				registers[pc] += sizeof(uint32_t);
+			}
 		}
 		else
-		{ // LDI from pool item
-			auto decodedPoolItem = poolItemHandler(val);
-			registers[instruction.gen.dest] = decodedPoolItem.value;
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BEQ: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
 		}
+		break;
+	}
+	case BGE: // 0x5F
+	{
 		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t bgeType = (val & 0xFF000000) >> 24;
+		if (bgeType != 0x00)
+		{
+			if (static_cast<int32_t>(registers[instruction.gen.dest]) >= static_cast<int32_t>(registers[instruction.gen.source]))
+			{
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
+			}
+			else
+			{
+				registers[pc] += sizeof(uint32_t);
+			}
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BGE: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
+		}
 		break;
 	}
 	case BGTU: // 0x62
@@ -259,7 +335,8 @@ void MophunVM::emulate()
 		uint8_t bgtuType = (val & 0xFF000000) >> 24;
 		if (bgtuType != 0x00)
 		{
-			if (registers[instruction.gen.dest] > registers[instruction.gen.source]) {
+			if (registers[instruction.gen.dest] > registers[instruction.gen.source])
+			{
 				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
 			}
 			else
@@ -271,6 +348,54 @@ void MophunVM::emulate()
 		{
 			// FIXME TODO -> check if this is possile
 			std::cout << "ERROR BGTU: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
+		}
+		break;
+	}
+	case BLE:
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t bleType = (val & 0xFF000000) >> 24;
+		if (bleType != 0x00)
+		{
+			if (static_cast<int32_t>(registers[instruction.gen.dest]) <= static_cast<int32_t>(registers[instruction.gen.source]))
+			{
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
+			}
+			else
+			{
+				registers[pc] += sizeof(uint32_t);
+			}
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BLE: unhandled case" << std::endl;
+			registers[pc] += sizeof(uint32_t);
+		}
+		break;
+	}
+	case BLEU: // 0x64
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		uint8_t bltuType = (val & 0xFF000000) >> 24;
+		if (bltuType != 0x00)
+		{
+			if (registers[instruction.gen.dest] <= registers[instruction.gen.source])
+			{
+				registers[pc] += decodeImmediate(val) - sizeof(uint32_t);
+			}
+			else
+			{
+				registers[pc] += sizeof(uint32_t);
+			}
+		}
+		else
+		{
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR BLEU: unhandled case" << std::endl;
 			registers[pc] += sizeof(uint32_t);
 		}
 		break;
