@@ -27,6 +27,10 @@ bool MophunVM::loadRom(const std::string& romPath)
 		memory.stringSegStartAddr = memory.poolSegStartAddr + (pRomHeader->poolSize * sizeof(PoolItem));
 		memory.heapStartAddr = memory.stringSegStartAddr + pRomHeader->stringSize;
 		memory.stackStartAddr = memory.ram.size() - pRomHeader->stackSize * 4;
+
+		// Initialize BSS segment
+		memory.ram.insert(memory.ram.begin() + memory.bssSegStartAddr, pRomHeader->bssSize, 0x0);
+
 		return true;
 	}
 	return false;

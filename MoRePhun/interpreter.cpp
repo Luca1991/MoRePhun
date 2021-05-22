@@ -267,7 +267,7 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		auto decodedPoolItem = poolItemHandler(*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]])));
 		registers[pc] += sizeof(uint32_t);
-
+	
 		if (!decodedPoolItem.isSyscall)
 		{
 			registers[ra] = registers[pc];
