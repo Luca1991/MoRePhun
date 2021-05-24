@@ -63,31 +63,31 @@ void MophunVM::emulate()
 		break;
 	case BGEI: // 0x2E
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) >= static_cast<int8_t>((instruction.gen.source)))
-			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+			registers[pc] += static_cast<int8_t>(instruction.gen.extra) * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BEQI: // 0x2C
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) == static_cast<int8_t>((instruction.gen.source)))
-			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+			registers[pc] += static_cast<int8_t>(instruction.gen.extra) * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BNEI: // 0x2D
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) != static_cast<int8_t>((instruction.gen.source)))
-			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+			registers[pc] += static_cast<int8_t>(instruction.gen.extra) * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BGTI: // 0x30
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) > static_cast<int8_t>((instruction.gen.source)))
-			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+			registers[pc] += static_cast<int8_t>(instruction.gen.extra) * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;
 	case BLEI: // 0x32 
 		if (static_cast<int32_t>(registers[instruction.gen.dest]) <= static_cast<int8_t>((instruction.gen.source)))
-			registers[pc] += instruction.gen.extra * sizeof(uint32_t);
+			registers[pc] += static_cast<int8_t>(instruction.gen.extra) * sizeof(uint32_t);
 		else
 			registers[pc] += sizeof(uint32_t);
 		break;

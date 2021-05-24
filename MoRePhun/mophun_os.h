@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mophun_vm.h"
-#include "api\os_data.h"
+#include "api/os_data.h"
 #include "video.h"
 
 class MophunOS {
@@ -26,6 +26,9 @@ class MophunOS {
 		// System api
 		uint32_t vGetRandom();
 		void vTerminateVMGP();
+
+		// String api
+		const char* vStrCpy(char* s1, const char* s2);
 
 		// Graphics api
 		void vClearScreen(uint32_t color);

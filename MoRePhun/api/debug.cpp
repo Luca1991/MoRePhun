@@ -1,5 +1,5 @@
-#include "..\mophun_os.h"
-#include "..\registers.h"
+#include "../mophun_os.h"
+#include "../registers.h"
 #include <sstream>
 
 void MophunOS::DbgPrintf(const std::string& str)

@@ -1,4 +1,4 @@
-#include "..\mophun_os.h"
+#include "../mophun_os.h"
 #include <chrono>
 
 uint32_t MophunOS::vGetTickCount()

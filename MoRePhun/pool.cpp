@@ -19,6 +19,10 @@ PoolData MophunVM::poolItemHandler(uint32_t index)
 		poolData.isPointer = true;
 		poolData.value = memory.dataSegStartAddr + poolItem.extra;
 		break;
+	case 4:
+		poolData.isPointer = true;
+		poolData.value = memory.bssSegStartAddr + poolItem.extra;
+		break;
 	case 6:		// immediate float
 		poolData.value = poolItem.extra;
 		break;

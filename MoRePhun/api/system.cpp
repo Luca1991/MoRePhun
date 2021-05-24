@@ -1,6 +1,6 @@
 #include <iostream>
 #include "system.h"
-#include "..\mophun_os.h"
+#include "../mophun_os.h"
 
 
 uint32_t MophunOS::vGetRandom()

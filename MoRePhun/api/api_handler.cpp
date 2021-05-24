@@ -1,5 +1,5 @@
-#include "..\mophun_os.h"
-#include "..\registers.h"
+#include "../mophun_os.h"
+#include "../registers.h"
 #include "system.h"
 
 
@@ -36,6 +36,11 @@ void MophunOS::apiHandler(const std::string &api)
 	else if (api == "vGetTickCount")
 	{
 		mophunVM->writeReg(r0, vGetTickCount());
+	}
+	else if (api == "vStrCpy")
+	{
+		vStrCpy(reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p0))),
+			reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p1))));
 	}
 	else {
 		std::cout << "Unknown api: " << api.c_str() << std::endl;
