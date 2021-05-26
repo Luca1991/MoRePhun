@@ -22,6 +22,23 @@ void MophunOS::apiHandler(const std::string &api)
 		printf("vFlipScreen %x\n", mophunVM->readReg(p0));
 		vFlipScreen(mophunVM->readReg(p0));
 	}
+	else if (api == "vSpriteInit")
+	{
+		mophunVM->writeReg(r0, vSpriteInit(mophunVM->readReg(p0)));
+	}
+	else if (api == "vSpriteClear")
+	{
+		vSpriteClear();
+	}
+	else if (api == "vSpriteSet")
+	{
+		vSpriteSet(mophunVM->readReg(p0), reinterpret_cast<SPRITE*>(mophunVM->getRamAddress(mophunVM->readReg(p1))),
+			mophunVM->readReg(p2), mophunVM->readReg(p3));
+	}
+	else if (api == "vUpdateSprite")
+	{
+		vUpdateSprite();
+	}
 	else if (api == "vSetForeColor")
 	{
 		vSetForeColor(mophunVM->readReg(p0));
