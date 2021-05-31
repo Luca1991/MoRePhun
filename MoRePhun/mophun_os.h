@@ -3,6 +3,7 @@
 #include "mophun_vm.h"
 #include "api/os_data.h"
 #include "video.h"
+#include "input.h"
 
 class MophunOS {
 
@@ -15,6 +16,7 @@ class MophunOS {
 	private:
 		MophunVM* mophunVM = new MophunVM();
 		Video* video = new Video();
+		Input* input = new Input();
 		OSData osdata;
 		void apiHandler(const std::string& api);
 		bool status;
@@ -38,6 +40,9 @@ class MophunOS {
 		void vSpriteClear();
 		void vSpriteSet(uint8_t slot, SPRITE* sprite, int16_t x, int16_t y);
 		void vUpdateSprite();
+
+		// Input api
+		uint32_t vGetButtonData();
 
 		// Time/data api
 		uint32_t vGetTickCount();

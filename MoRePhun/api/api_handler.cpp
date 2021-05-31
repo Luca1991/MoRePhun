@@ -43,6 +43,10 @@ void MophunOS::apiHandler(const std::string &api)
 	{
 		vSetForeColor(mophunVM->readReg(p0));
 	}
+	else if (api == "vGetButtonData")
+	{
+		mophunVM->writeReg(r0, vGetButtonData());
+	}
 	else if (api == "vTerminateVMGP") {
 		vTerminateVMGP();
 		status = false;

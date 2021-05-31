@@ -13,6 +13,7 @@ MophunOS::~MophunOS()
 {
 	delete mophunVM;
 	delete video;
+	delete input;
 }
 
 bool MophunOS::loadRom()
@@ -33,6 +34,7 @@ void MophunOS::emulate()
 {
 	while (status)
 	{
+		SDL_PollEvent(NULL);
 		mophunVM->emulate();
 	}
 }

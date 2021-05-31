@@ -37,6 +37,10 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = registers[instruction.gen.source];
 		break;
+	case MOVH: // 0x1B
+		registers[pc] += sizeof(uint32_t);
+		registers[instruction.gen.dest] = static_cast<uint16_t>(registers[instruction.gen.source]);
+		break;
 	case SLLi: // 0x1C
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = registers[instruction.gen.source] << instruction.gen.extra;
