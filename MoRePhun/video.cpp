@@ -3,7 +3,7 @@
 
 Video::Video()
 {
-	int rendererFlags = SDL_RENDERER_ACCELERATED;
+	int rendererFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
 	int windowFlags = 0;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)

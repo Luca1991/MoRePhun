@@ -31,6 +31,8 @@ bool MophunVM::loadRom(const std::string& romPath)
 		// Initialize BSS segment
 		memory.ram.insert(memory.ram.begin() + memory.bssSegStartAddr, pRomHeader->bssSize, 0x0);
 
+		poolParser();
+
 		return true;
 	}
 	return false;

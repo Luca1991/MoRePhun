@@ -33,13 +33,18 @@ class MophunOS {
 		const char* vStrCpy(char* s1, const char* s2);
 
 		// Graphics api
-		void vClearScreen(uint32_t color);
+		void vClearScreen(int32_t color);
 		void vFlipScreen(uint32_t block);
-		void vSetForeColor(uint32_t color);
+		void vSetForeColor(int32_t color);
 		uint32_t vSpriteInit(uint8_t count);
 		void vSpriteClear();
 		void vSpriteSet(uint8_t slot, SPRITE* sprite, int16_t x, int16_t y);
 		void vUpdateSprite();
+		VMGPFONT* vSetActiveFont(VMGPFONT* pFont);
+		void vPrint(int32_t mode, int32_t x, int32_t y, const char* str);
+
+		// Tileamp and Sprite api
+		int16_t vSpriteCollision(uint8_t slot, uint8_t slotfrom, uint8_t slotto);
 
 		// Input api
 		uint32_t vGetButtonData();

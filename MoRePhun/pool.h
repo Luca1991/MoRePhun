@@ -11,7 +11,6 @@ struct PoolItem {
 static_assert(sizeof(PoolItem) == 8, "Abnormal PoolItem element");
 
 struct PoolData {
-	bool isPointer = false;
 	bool isSyscall = false;
 	union {
 		uint32_t value;

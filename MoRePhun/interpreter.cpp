@@ -33,6 +33,10 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = -(registers[instruction.gen.source]);
 		break;
+	case EXSH:
+		registers[pc] += sizeof(uint32_t);
+		registers[instruction.gen.dest] = static_cast<int16_t>(registers[instruction.gen.source]);
+		break;
 	case MOV: // 0x11
 		registers[pc] += sizeof(uint32_t);
 		registers[instruction.gen.dest] = registers[instruction.gen.source];
@@ -198,6 +202,39 @@ void MophunVM::emulate()
 		}
 		break;
 	}
+	case STBd: // 0x52
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t stwType = (val & 0xFF000000) >> 24;
+		if (stwType != 0x00)
+		{	// STB immediate
+			*reinterpret_cast<uint8_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + decodeImmediate(val)])) = registers[instruction.gen.dest];
+		}
+		else
+		{ // STB from pool item
+			*reinterpret_cast<uint8_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + poolDataList[val-1].value])) = registers[instruction.gen.dest];
+		}
+		break;
+	}
+	case STHd: // 0x53
+	{
+		registers[pc] += sizeof(uint32_t);
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
+		registers[pc] += sizeof(uint32_t);
+		uint8_t stwType = (val & 0xFF000000) >> 24;
+		if (stwType != 0x00)
+		{	// STH immediate
+			*reinterpret_cast<uint16_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + decodeImmediate(val)])) = registers[instruction.gen.dest];
+		}
+		else
+		{ // STH from pool item
+			// FIXME TODO -> check if this is possile
+			std::cout << "ERROR STHd: unhandled case" << std::endl;
+		}
+		break;
+	}
 	case STWd: // 0x54
 	{
 		registers[pc] += sizeof(uint32_t);
@@ -210,8 +247,7 @@ void MophunVM::emulate()
 		}
 		else
 		{ // STW from pool item
-			// FIXME TODO -> check if this is possile
-			std::cout << "ERROR STWd: unhandled case" << std::endl;
+			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[instruction.gen.source] + poolDataList[val - 1].value])) = registers[instruction.gen.dest];
 		}
 		break;
 	}
@@ -243,8 +279,7 @@ void MophunVM::emulate()
 		}
 		else
 		{ // LDI from pool item
-			auto decodedPoolItem = poolItemHandler(val);
-			registers[instruction.gen.dest] = decodedPoolItem.value;
+			registers[instruction.gen.dest] = poolDataList[val - 1].value;
 		}
 		registers[pc] += sizeof(uint32_t);
 		break;
@@ -269,17 +304,18 @@ void MophunVM::emulate()
 	case CALLl: // 0x5C
 	{
 		registers[pc] += sizeof(uint32_t);
-		auto decodedPoolItem = poolItemHandler(*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]])));
+		//auto decodedPoolItem = poolItemHandler(*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]])));
+		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 	
-		if (!decodedPoolItem.isSyscall)
+		if (!poolDataList[val - 1].isSyscall)
 		{
 			registers[ra] = registers[pc];
-			registers[pc] = decodedPoolItem.value;
+			registers[pc] = poolDataList[val - 1].value;
 		}
 		else
 		{
-			std::string api = reinterpret_cast<char*>(std::addressof(memory.ram[decodedPoolItem.value]));
+			std::string api = reinterpret_cast<char*>(std::addressof(memory.ram[poolDataList[val - 1].value]));
 			apiHandler(api);
 		}
 		break;

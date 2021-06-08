@@ -14,12 +14,10 @@ void MophunOS::apiHandler(const std::string &api)
 	}
 	else if (api == "vClearScreen")
 	{
-		printf("vClearScreen: %x\n", mophunVM->readReg(p0));
-		vClearScreen(mophunVM->readReg(p0));
+		vClearScreen(static_cast<int32_t>(mophunVM->readReg(p0)));
 	}
 	else if (api == "vFlipScreen")
 	{
-		printf("vFlipScreen %x\n", mophunVM->readReg(p0));
 		vFlipScreen(mophunVM->readReg(p0));
 	}
 	else if (api == "vSpriteInit")
@@ -41,7 +39,7 @@ void MophunOS::apiHandler(const std::string &api)
 	}
 	else if (api == "vSetForeColor")
 	{
-		vSetForeColor(mophunVM->readReg(p0));
+		vSetForeColor(static_cast<int32_t>(mophunVM->readReg(p0)));
 	}
 	else if (api == "vGetButtonData")
 	{
@@ -62,6 +60,19 @@ void MophunOS::apiHandler(const std::string &api)
 	{
 		vStrCpy(reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p0))),
 			reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p1))));
+	}
+	else if (api == "vSpriteCollision") {
+		mophunVM->writeReg(r0, vSpriteCollision(mophunVM->readReg(p0), mophunVM->readReg(p1), mophunVM->readReg(p2)));
+	}
+	else if (api == "vSetActiveFont")
+	{
+		vSetActiveFont(reinterpret_cast<VMGPFONT*>(mophunVM->getRamAddress(mophunVM->readReg(p0))));
+	}
+	else if (api == "vPrint") {
+		vPrint(static_cast<int32_t>(mophunVM->readReg(p0)),
+			static_cast<int32_t>(mophunVM->readReg(p1)),
+				static_cast<int32_t>(mophunVM->readReg(p2)),
+			reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p3))));
 	}
 	else {
 		std::cout << "Unknown api: " << api.c_str() << std::endl;

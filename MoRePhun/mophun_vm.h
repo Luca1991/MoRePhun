@@ -22,12 +22,14 @@ class MophunVM {
 		void emulate();
 		uint32_t readReg(uint32_t reg);
 		void writeReg(uint32_t reg, uint32_t val);
-		uint32_t readRam(uint32_t offset);
+		uint8_t readRam(uint32_t offset);
 		uint8_t* getRamAddress(uint32_t offset);
 	private:
 		VMGPHeader* pRomHeader;
 		Memory memory;
 		ApiCallback apiHandler;
 		std::unordered_map<unsigned char, uint32_t> registers;
-		PoolData poolItemHandler(uint32_t index);		
+		std::vector<PoolData> poolDataList;
+		void poolParser();
+		PoolData decodePoolItem(uint32_t index);
 };

@@ -1,34 +1,58 @@
 #include "mophun_vm.h"
 #include <string>
 
-PoolData MophunVM::poolItemHandler(uint32_t index)
+
+
+PoolData MophunVM::decodePoolItem(uint32_t index)
 {
-	const auto& poolItem = reinterpret_cast<PoolItem*>(memory.ram.data() + memory.poolSegStartAddr)[index - 1];
+	const auto& poolItem = reinterpret_cast<PoolItem*>(memory.ram.data() + memory.poolSegStartAddr)[index];
 	PoolData poolData;
-	switch (poolItem.segment_0)
+	
+	if (poolItem.segment_1 == 0x4)
 	{
-	case 0:		// string segment
-		poolData.isSyscall = true;
-		poolData.isPointer = true;
-		poolData.value = memory.stringSegStartAddr + poolItem.segmentoffset;
-		break;
-	case 1:		// code segment
-		poolData.value = memory.codeSegStartAddr + poolItem.extra;
-		break;
-	case 2:		// data segment
-		poolData.isPointer = true;
-		poolData.value = memory.dataSegStartAddr + poolItem.extra;
-		break;
-	case 4:
-		poolData.isPointer = true;
-		poolData.value = memory.bssSegStartAddr + poolItem.extra;
-		break;
-	case 6:		// immediate float
-		poolData.value = poolItem.extra;
-		break;
-	default:
-		throw std::runtime_error("!!! Pool handler error: " + std::to_string(poolItem.segment_0));
-		break;
+		if(poolItem.segment_0 != 2 || poolItem.segmentoffset != 2)
+			throw std::runtime_error("!!! Pool handler error !!!");
+		*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[memory.dataSegStartAddr + poolItem.extra])) += memory.dataSegStartAddr;
+	}
+	else if (poolItem.segment_1 == 0x8)
+	{
+		poolData.value = poolItem.extra + decodePoolItem(poolItem.segmentoffset-1).value;
+	}
+	else
+	{
+		switch (poolItem.segment_0)
+		{
+		case 0:		// string segment
+			poolData.isSyscall = true;
+			poolData.value = memory.stringSegStartAddr + poolItem.segmentoffset;
+			break;
+		case 1:		// code segment
+			poolData.value = memory.codeSegStartAddr + poolItem.extra;
+			break;
+		case 2:		// data segment
+			poolData.value = memory.dataSegStartAddr + poolItem.extra;
+			break;
+		case 4:		// bss segment
+			poolData.value = memory.bssSegStartAddr + poolItem.extra;
+			break;
+		case 6:		// immediate float
+			poolData.value = poolItem.extra;
+			break;
+		default:
+			throw std::runtime_error("!!! Pool handler error: " + std::to_string(poolItem.segment_0));
+			break;
+		}
 	}
 	return poolData;
+}
+
+void MophunVM::poolParser()
+{
+	int totalPoolItems = (memory.stringSegStartAddr - memory.poolSegStartAddr) / sizeof(PoolItem);
+	poolDataList.resize(totalPoolItems);
+	for (int i = 0; i < totalPoolItems; i++)
+	{
+		const auto& poolItem = reinterpret_cast<PoolItem*>(memory.ram.data() + memory.poolSegStartAddr)[i];
+		poolDataList[i] = decodePoolItem(i);
+	}
 }

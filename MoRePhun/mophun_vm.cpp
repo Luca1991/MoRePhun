@@ -34,7 +34,7 @@ void MophunVM::writeReg(uint32_t reg, uint32_t val)
 	registers[reg] = val;
 }
 
-uint32_t MophunVM::readRam(uint32_t offset)
+uint8_t MophunVM::readRam(uint32_t offset)
 {
 	return memory.ram[offset];
 }

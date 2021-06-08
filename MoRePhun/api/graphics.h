@@ -2,6 +2,13 @@
 #include <cstdint>
 #include "../video.h"
 
+#define MODE_BLOCK 0
+#define MODE_TRANS 1
+#define MODE_FLIPX 2
+#define MODE_FLIPY 4
+#define MODE_ROT90 2
+#define MODE_ROT270 4
+
 inline Uint32 decodePixelFormat(uint8_t format) { 
 	switch (format)
 	{
@@ -13,6 +20,17 @@ inline Uint32 decodePixelFormat(uint8_t format) {
 
 	}
 }
+
+#pragma pack(push, 1)
+struct VMGPFONT {
+	uint32_t fontdata;
+	uint32_t chartbl;
+	uint8_t bpp;
+	uint8_t width;
+	uint8_t height;
+	uint8_t palindex;
+};
+#pragma pack(pop)
 
 #pragma pack(push, 1)
 struct SPRITE {
