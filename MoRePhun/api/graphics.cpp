@@ -154,7 +154,7 @@ void MophunOS::vPrint(int32_t mode, int32_t x, int32_t y, const char* str)
 			}
 		}
 
-		x += osdata.currentFont->width + 1;
+		x += osdata.currentFont->width;
 		str += 1;
 	}
 
