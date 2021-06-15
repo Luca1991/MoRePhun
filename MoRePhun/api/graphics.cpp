@@ -1,8 +1,10 @@
 #include "../mophun_os.h"
+#include "../registers.h"
 #include <bitset>
 
-void MophunOS::vClearScreen(int32_t color)
+void MophunOS::vClearScreen()
 {
+	int32_t color = static_cast<int32_t>(mophunVM->readReg(p0));
 	uint8_t rgb[3];
 	if (color & (1 << 31))
 	{
@@ -21,14 +23,16 @@ void MophunOS::vClearScreen(int32_t color)
 }
 
 
-void MophunOS::vFlipScreen(uint32_t block)
+void MophunOS::vFlipScreen()
 {
 	// FIXME TODO: check vblank
+	uint32_t block = mophunVM->readReg(p0);
 	SDL_RenderPresent(video->app.renderer);
 }
 
-void MophunOS::vSetForeColor(int32_t color)
+void MophunOS::vSetForeColor()
 {	
+	int32_t color = static_cast<int32_t>(mophunVM->readReg(p0));
 	if (color & (1 << 31))
 	{
 		osdata.currentFgColor[0] = (color & 0x7C00) >> 7;
@@ -43,10 +47,11 @@ void MophunOS::vSetForeColor(int32_t color)
 	}
 }
 
-uint32_t MophunOS::vSpriteInit(uint8_t count)
+void MophunOS::vSpriteInit()
 {
+	uint8_t count = mophunVM->readReg(p0);
 	osdata.spriteSlots.resize(count);
-	return 1;
+	mophunVM->writeReg(r0, 1);
 }
 
 void MophunOS::vSpriteClear()
@@ -60,8 +65,13 @@ void MophunOS::vSpriteClear()
 	osdata.spriteSlots.resize(size);
 }
 
-void MophunOS::vSpriteSet(uint8_t slot, SPRITE* sprite, int16_t x, int16_t y)
+void MophunOS::vSpriteSet()
 {
+	uint8_t slot = mophunVM->readReg(p0);
+	SPRITE* sprite = reinterpret_cast<SPRITE*>(mophunVM->getRamAddress(mophunVM->readReg(p1)));
+	int16_t x = mophunVM->readReg(p2);
+	int16_t y = mophunVM->readReg(p3);
+
 	if (osdata.spriteSlots[slot].spriteTexture != nullptr)
 	{
 		SDL_DestroyTexture(osdata.spriteSlots[slot].spriteTexture);
@@ -94,16 +104,21 @@ void MophunOS::vUpdateSprite()
 	}
 }
 
-VMGPFONT* MophunOS::vSetActiveFont(VMGPFONT* pFont)
+void MophunOS::vSetActiveFont()
 {
+	VMGPFONT* pFont = reinterpret_cast<VMGPFONT*>(mophunVM->getRamAddress(mophunVM->readReg(p0)));
 	osdata.previousFont = osdata.currentFont;
 	osdata.currentFont = pFont;
-	return osdata.previousFont;
+	// FIXME return osdata.previousFont in r0
 }
 
 
-void MophunOS::vPrint(int32_t mode, int32_t x, int32_t y, const char* str)
+void MophunOS::vPrint()
 {
+	int32_t mode = static_cast<int32_t>(mophunVM->readReg(p0));
+	int32_t x = static_cast<int32_t>(mophunVM->readReg(p1));
+	int32_t y = static_cast<int32_t>(mophunVM->readReg(p2));
+	const char* str = reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p3)));
 	if (mode != MODE_TRANS || osdata.currentFont->bpp != 1)
 	{
 		std::cout << "unsupported vPrint mode: " << mode << "or bpp: " << osdata.currentFont->bpp << std::endl;

@@ -1,7 +1,8 @@
 #include "../mophun_os.h"
+#include "../registers.h"
 #include "input_facilities.h"
 
-uint32_t MophunOS::vGetButtonData()
+void MophunOS::vGetButtonData()
 {
     uint32_t pressedKeys = 0;
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
@@ -16,5 +17,5 @@ uint32_t MophunOS::vGetButtonData()
     if (keystate[input->keys[POINTERDOWN]])     pressedKeys += POINTER_DOWN;
     if (keystate[input->keys[POINTERALTDOWN]])  pressedKeys += POINTER_ALTDOWN;
 
-    return pressedKeys;
+    mophunVM->writeReg(r0, pressedKeys);
 }

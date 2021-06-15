@@ -1,16 +1,20 @@
 #include "../mophun_os.h"
+#include "../registers.h"
 
-const char* MophunOS::vStrCpy(char* s1, const char* s2)
+void MophunOS::vStrCpy()
 {
-	if (s1 == nullptr)
-		return nullptr;
+	char* str1 = reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p0)));
+	const char* str2 = reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p1)));
 
-	while (*s2 != '\0')
+	if (str1 == nullptr)
+		return;
+
+	while (*str2 != '\0')
 	{
-		*s1 = *s2;
-		s1++;
-		s2++;
+		*str1 = *str2;
+		str1++;
+		str2++;
 	}
-	*s1 = '\0';
-	return s2;
+	*str1 = '\0';
+	// FIXME return str2 in r0
 }

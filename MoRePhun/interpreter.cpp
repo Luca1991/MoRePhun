@@ -304,7 +304,6 @@ void MophunVM::emulate()
 	case CALLl: // 0x5C
 	{
 		registers[pc] += sizeof(uint32_t);
-		//auto decodedPoolItem = poolItemHandler(*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]])));
 		auto val = *reinterpret_cast<uint32_t*>(std::addressof(memory.ram[registers[pc]]));
 		registers[pc] += sizeof(uint32_t);
 	
@@ -315,8 +314,7 @@ void MophunVM::emulate()
 		}
 		else
 		{
-			std::string api = reinterpret_cast<char*>(std::addressof(memory.ram[poolDataList[val - 1].value]));
-			apiHandler(api);
+			poolDataList[val - 1].fun();
 		}
 		break;
 	}

@@ -19,11 +19,6 @@ MophunVM::~MophunVM()
 
 }
 
-void MophunVM::setApiCallback(const ApiCallback& apiHandler)
-{
-	this->apiHandler = apiHandler;
-}
-
 uint32_t MophunVM::readReg(uint32_t reg)
 {
 	return registers[reg];
@@ -42,4 +37,9 @@ uint8_t MophunVM::readRam(uint32_t offset)
 uint8_t* MophunVM::getRamAddress(uint32_t offset)
 {
 	return std::addressof(memory.ram[offset]);
+}
+
+std::vector<PoolData>* MophunVM::getPoolEntries()
+{
+	return std::addressof(poolDataList);
 }

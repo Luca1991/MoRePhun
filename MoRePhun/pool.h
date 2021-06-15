@@ -12,8 +12,6 @@ static_assert(sizeof(PoolItem) == 8, "Abnormal PoolItem element");
 
 struct PoolData {
 	bool isSyscall = false;
-	union {
-		uint32_t value;
-		uint32_t* ptr;
-	};
+	uint32_t value;
+	std::function<void()> fun;
 };

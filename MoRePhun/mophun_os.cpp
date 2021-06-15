@@ -5,7 +5,23 @@ MophunOS::MophunOS()
 {
 	status = true;
 	osdata.timer = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-	mophunVM->setApiCallback([this](const std::string& api) { return apiHandler(api); });
+
+	syscalls["DbgPrintf"] = std::bind(&MophunOS::DbgPrintf, this);
+	syscalls["vClearScreen"] = std::bind(&MophunOS::vClearScreen, this);
+	syscalls["vFlipScreen"] = std::bind(&MophunOS::vFlipScreen, this);
+	syscalls["vGetButtonData"] = std::bind(&MophunOS::vGetButtonData, this);
+	syscalls["vGetRandom"] = std::bind(&MophunOS::vGetRandom, this);
+	syscalls["vGetTickCount"] = std::bind(&MophunOS::vGetTickCount, this);
+	syscalls["vPrint"] = std::bind(&MophunOS::vPrint, this);
+	syscalls["vSetActiveFont"] = std::bind(&MophunOS::vSetActiveFont, this);
+	syscalls["vSetForeColor"] = std::bind(&MophunOS::vSetForeColor, this);
+	syscalls["vSpriteClear"] = std::bind(&MophunOS::vSpriteClear, this);
+	syscalls["vSpriteCollision"] = std::bind(&MophunOS::vSpriteCollision, this);
+	syscalls["vSpriteInit"] = std::bind(&MophunOS::vSpriteInit, this);
+	syscalls["vSpriteSet"] = std::bind(&MophunOS::vSpriteSet, this);
+	syscalls["vStrCpy"] = std::bind(&MophunOS::vStrCpy, this);
+	syscalls["vTerminateVMGP"] = std::bind(&MophunOS::vTerminateVMGP, this);	
+	syscalls["vUpdateSprite"] = std::bind(&MophunOS::vUpdateSprite, this);
 }
 
 
@@ -32,9 +48,33 @@ bool MophunOS::loadRom()
 
 void MophunOS::emulate()
 {
+	setupSyscalls();
 	while (status)
 	{
 		SDL_PollEvent(NULL);
 		mophunVM->emulate();
+	}
+}
+
+void MophunOS::setupSyscalls()
+{
+	std::vector<PoolData>* poolDataList = mophunVM->getPoolEntries();
+	
+	for (PoolData &poolData: *poolDataList)
+	{
+		if (!poolData.isSyscall)
+			continue;
+		std::string syscall = reinterpret_cast<char*>(mophunVM->getRamAddress(poolData.value));
+		if (syscall.length() == 0)
+			continue;
+
+		auto iter = syscalls.find(syscall);
+		if (iter == syscalls.end())
+		{
+			std::cout << "unimplmented syscall: " << syscall << std::endl;
+			continue;
+		}
+
+		poolData.fun = iter->second;
 	}
 }

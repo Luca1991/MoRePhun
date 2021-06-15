@@ -1,14 +1,17 @@
 #include <iostream>
 #include "system.h"
 #include "../mophun_os.h"
+#include "../registers.h"
 
 
-uint32_t MophunOS::vGetRandom()
+void MophunOS::vGetRandom()
 {
-	return rand() % (VRAND_MAX + 1);
+	uint32_t rnd = rand() % (VRAND_MAX + 1);
+	mophunVM->writeReg(r0, rnd);
 }
 
-void MophunOS::vTerminateVMGP()
+void MophunOS::vTerminateVMGP(void)
 {
 	std::cout << "vTerminateVMGP -> Program ended!" << std::endl;
+	status = false;
 }

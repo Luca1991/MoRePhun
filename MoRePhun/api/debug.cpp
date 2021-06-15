@@ -2,8 +2,11 @@
 #include "../registers.h"
 #include <sstream>
 
-void MophunOS::DbgPrintf(const std::string& str)
+void MophunOS::DbgPrintf()
 {
+	if (mophunVM->readReg(sp) == RAM_SIZE) // FIXME THI IS WRONG!!
+		return;
+	const std::string& str = reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p0)));
 	std::stringstream ss;
 	uint32_t stackTmpPnt = mophunVM->readReg(sp);
 	for (int i = 0; i < str.size();)

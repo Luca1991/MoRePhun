@@ -10,7 +10,6 @@
 #include "memory.h"
 #include "pool.h"
 
-typedef std::function<void(const std::string& api)> ApiCallback;
 
 class MophunVM {
 
@@ -18,16 +17,15 @@ class MophunVM {
 		MophunVM();
 		~MophunVM();
 		bool loadRom(const std::string& romPath);
-		void setApiCallback(const ApiCallback& apiHandler);
 		void emulate();
 		uint32_t readReg(uint32_t reg);
 		void writeReg(uint32_t reg, uint32_t val);
 		uint8_t readRam(uint32_t offset);
 		uint8_t* getRamAddress(uint32_t offset);
+		std::vector<PoolData>* getPoolEntries();
 	private:
 		VMGPHeader* pRomHeader;
 		Memory memory;
-		ApiCallback apiHandler;
 		std::unordered_map<unsigned char, uint32_t> registers;
 		std::vector<PoolData> poolDataList;
 		void poolParser();
