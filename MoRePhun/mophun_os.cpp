@@ -20,7 +20,7 @@ MophunOS::MophunOS()
 	syscalls["vSpriteInit"] = std::bind(&MophunOS::vSpriteInit, this);
 	syscalls["vSpriteSet"] = std::bind(&MophunOS::vSpriteSet, this);
 	syscalls["vStrCpy"] = std::bind(&MophunOS::vStrCpy, this);
-	syscalls["vTerminateVMGP"] = std::bind(&MophunOS::vTerminateVMGP, this);	
+	syscalls["vTerminateVMGP"] = std::bind(&MophunOS::vTerminateVMGP, this);
 	syscalls["vUpdateSprite"] = std::bind(&MophunOS::vUpdateSprite, this);
 }
 
@@ -59,7 +59,7 @@ void MophunOS::emulate()
 void MophunOS::setupSyscalls()
 {
 	std::vector<PoolData>* poolDataList = mophunVM->getPoolEntries();
-	
+
 	for (PoolData &poolData: *poolDataList)
 	{
 		if (!poolData.isSyscall)

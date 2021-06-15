@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mophun_vm.h"
-#include "api/os_data.h"
+#include "syscall/os_data.h"
 #include "video.h"
 #include "input.h"
 
