@@ -5,6 +5,7 @@ MophunOS::MophunOS()
 {
 	status = true;
 	osdata.timer = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	osdata.streamCounter = 0;
 
 	syscalls["DbgPrintf"] = std::bind(&MophunOS::DbgPrintf, this);
 	syscalls["vClearScreen"] = std::bind(&MophunOS::vClearScreen, this);
@@ -20,6 +21,10 @@ MophunOS::MophunOS()
 	syscalls["vSpriteInit"] = std::bind(&MophunOS::vSpriteInit, this);
 	syscalls["vSpriteSet"] = std::bind(&MophunOS::vSpriteSet, this);
 	syscalls["vStrCpy"] = std::bind(&MophunOS::vStrCpy, this);
+	syscalls["vStreamClose"] = std::bind(&MophunOS::vStreamClose, this);
+	syscalls["vStreamOpen"] = std::bind(&MophunOS::vStreamOpen, this);
+	syscalls["vStreamRead"] = std::bind(&MophunOS::vStreamRead, this);
+	syscalls["vStreamWrite"] = std::bind(&MophunOS::vStreamWrite, this);
 	syscalls["vTerminateVMGP"] = std::bind(&MophunOS::vTerminateVMGP, this);
 	syscalls["vUpdateSprite"] = std::bind(&MophunOS::vUpdateSprite, this);
 }

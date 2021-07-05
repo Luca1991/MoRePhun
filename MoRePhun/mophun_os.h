@@ -28,13 +28,6 @@ class MophunOS {
 		void DbgPrintf();
 		std::string getStringFromMemory(uint32_t addr);
 
-		// System api
-		void vGetRandom();
-		void vTerminateVMGP();
-
-		// String api
-		void vStrCpy();
-
 		// Graphics api
 		void vClearScreen();
 		void vFlipScreen();
@@ -45,6 +38,19 @@ class MophunOS {
 		void vUpdateSprite();
 		void vSetActiveFont();
 		void vPrint();
+
+		// System api
+		void vGetRandom();
+		void vTerminateVMGP();
+
+		// Stream IO api
+		void vStreamClose();
+		void vStreamOpen();
+		void vStreamRead();
+		void vStreamWrite();
+
+		// String api
+		void vStrCpy();
 
 		// Tileamp and Sprite api
 		void vSpriteCollision();
