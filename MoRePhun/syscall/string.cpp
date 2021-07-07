@@ -18,3 +18,10 @@ void MophunOS::vStrCpy()
 	*str1 = '\0';
 	// FIXME return str2 in r0
 }
+
+void MophunOS::vStrLen()
+{
+	char* str = reinterpret_cast<char*>(mophunVM->getRamAddress(mophunVM->readReg(p0)));
+	int32_t len = std::strlen(str);
+	mophunVM->writeReg(r0, len);
+}

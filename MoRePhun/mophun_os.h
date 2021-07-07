@@ -51,6 +51,7 @@ class MophunOS {
 
 		// String api
 		void vStrCpy();
+		void vStrLen();
 
 		// Tileamp and Sprite api
 		void vSpriteCollision();

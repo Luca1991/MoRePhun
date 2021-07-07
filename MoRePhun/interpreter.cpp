@@ -134,9 +134,15 @@ void MophunVM::emulate()
 		registers[pc] += sizeof(uint32_t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		break;
+	case SYSCPY: // 0x48
+		registers[pc] += sizeof(uint32_t);
+		std::copy_n(reinterpret_cast<uint8_t*>(std::addressof(memory.ram[registers[instruction.gen.source]])),
+			registers[instruction.gen.extra],
+			reinterpret_cast<uint8_t*>(std::addressof(memory.ram[registers[instruction.gen.dest]])));
+		break;
 	case SYSSET: // 0x49
 		registers[pc] += sizeof(uint32_t);
-		std::fill_n(reinterpret_cast<uint8_t*>(std::addressof(memory.ram[instruction.gen.dest])),
+		std::fill_n(reinterpret_cast<uint8_t*>(std::addressof(memory.ram[registers[instruction.gen.dest]])),
 			registers[instruction.gen.extra],
 			static_cast<uint8_t>(registers[instruction.gen.source]));
 		break;

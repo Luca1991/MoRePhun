@@ -21,6 +21,7 @@ MophunOS::MophunOS()
 	syscalls["vSpriteInit"] = std::bind(&MophunOS::vSpriteInit, this);
 	syscalls["vSpriteSet"] = std::bind(&MophunOS::vSpriteSet, this);
 	syscalls["vStrCpy"] = std::bind(&MophunOS::vStrCpy, this);
+	syscalls["vStrLen"] = std::bind(&MophunOS::vStrLen, this);
 	syscalls["vStreamClose"] = std::bind(&MophunOS::vStreamClose, this);
 	syscalls["vStreamOpen"] = std::bind(&MophunOS::vStreamOpen, this);
 	syscalls["vStreamRead"] = std::bind(&MophunOS::vStreamRead, this);
