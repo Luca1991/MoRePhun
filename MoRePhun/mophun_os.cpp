@@ -35,6 +35,19 @@ MophunOS::~MophunOS()
 	delete mophunVM;
 	delete video;
 	delete input;
+
+	// Clean sprites
+	for (int i = 0; i < osdata.spriteSlots.size(); i++)
+	{
+		SDL_DestroyTexture(osdata.spriteSlots[i].spriteTexture);
+	}
+
+	// Clean open files
+	for (auto it = osdata.streamSlots.begin(); it != osdata.streamSlots.end(); ++it)
+	{
+		if (it->second.fd != nullptr)
+			fclose(it->second.fd);
+	}
 }
 
 bool MophunOS::loadRom()
