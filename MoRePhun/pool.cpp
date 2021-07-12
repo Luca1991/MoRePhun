@@ -7,12 +7,17 @@ PoolData MophunVM::decodePoolItem(uint32_t index)
 {
 	const auto& poolItem = reinterpret_cast<PoolItem*>(memory.ram.data() + memory.poolSegStartAddr)[index];
 	PoolData poolData;
-	
+
 	if (poolItem.segment_1 == 0x4)
 	{
-		if(poolItem.segment_0 != 2 || poolItem.segmentoffset != 2)
+		if(poolItem.segment_0 != 2)
 			throw std::runtime_error("!!! Pool handler error !!!");
-		*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[memory.dataSegStartAddr + poolItem.extra])) += memory.dataSegStartAddr;
+		if (poolItem.segmentoffset == 2)
+			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[memory.dataSegStartAddr + poolItem.extra])) += memory.dataSegStartAddr;
+		else if (poolItem.segmentoffset == 1)
+			*reinterpret_cast<uint32_t*>(std::addressof(memory.ram[memory.codeSegStartAddr + poolItem.extra])) += memory.dataSegStartAddr;
+		else
+			throw std::runtime_error("!!! Pool handler error !!!");
 	}
 	else if (poolItem.segment_1 == 0x8)
 	{
